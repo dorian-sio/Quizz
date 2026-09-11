@@ -117,10 +117,7 @@
     <input type="radio" name="q2" value="The Legend of Zelda: Wand of Gamelon"> The Legend of Zelda: Wand of Gamelon<br>
     <input type="radio" name="q2" value="The Legend of Zelda: Links Faces of Evil"> The Legend of Zelda: Links Faces of Evil<br>
     <button class="valider" onclick="verifierReponse(2, 'The Legend of Zelda: Links Faces of Evil')">Valider la réponse</button>
-      <video class="video" controls>
-        <source src="Videos/FOE.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo.
-      </video>
+    <video controls src="Videos/FOE.mp4"></video>
   </div>
   
   <!-- Résultat Question 2 -->
@@ -427,10 +424,7 @@
     <h2>23. De quelle clip est-ce une parodie?</h2>
     <input type="text" id="reponse23" placeholder="Tape ta réponse ici" autocomplete="off"><br>
     <button class="valider" onclick="verifierReponseTexte(23, ['Beat It'])">Valider la réponse</button>
-    <video class="video" controls>
-        <source src="Videos/Mozinor.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo.
-      </video>
+    <video class="video" controls src="Videos/Mozinor.mp4"></video>
   </div>
 
   <!-- Résultat Question 23 -->
@@ -464,10 +458,7 @@
     <input type="radio" name="q25" value="The Edge of Dawn"> The Edge of Dawn<br>
     <input type="radio" name="q25" value="Still Alive"> Still Alive<br>
     <button class="valider" onclick="verifierReponse(25, 'Still Alive')">Valider la réponse</button>
-    <video class="video" controls>
-        <source src="Videos/Still_Alive.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo.
-      </video>
+    <video class="video" controls src="Videos/Still_Alive.mp4"></video>
   </div>
 
   <!-- Résultat Question 25 -->
@@ -1154,321 +1145,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-  <script>
-
-    let participantNom = "";
-    let score = 0;
-
-    function commencerQuiz() {
-      const nomInput = document.getElementById("nom").value.trim();
-      if (!nomInput) {
-        alert("Veuillez entrer votre nom.");
-        return;
-      }
-      participantNom = nomInput;
-      document.getElementById("identite").style.display = "none";
-      document.getElementById("quiz").style.display = "block";
-    }
-
-    // Fonction pour vérifier la réponse à chaque question (QCM)
-function verifierReponse(numero, bonneReponse) {
-  const reponse = document.querySelector(`input[name="q${numero}"]:checked`);
-  if (!reponse) {
-    alert("Veuillez choisir une réponse avant de continuer.");
-    return;
-  }
-
-  const feedback = document.getElementById(`feedback${numero}`);
-  const feedbackMessage = document.getElementById(`feedback${numero}Message`);
-
-  let estCorrect;
-
-  if (Array.isArray(bonneReponse)) {
-    estCorrect = bonneReponse.includes(reponse.value);
-  } else {
-    estCorrect = reponse.value === bonneReponse;
-  }
-
-  if (estCorrect) {
-    feedbackMessage.textContent = "Bonne réponse !";
-    feedbackMessage.classList.add("correct");
-    feedbackMessage.classList.remove("incorrect");
-    score++;
-  } else {
-    feedbackMessage.textContent =
-      "Mauvaise réponse ! La bonne réponse était : " +
-      (Array.isArray(bonneReponse)
-        ? bonneReponse.join(" / ")
-        : bonneReponse);
-    feedbackMessage.classList.add("incorrect");
-    feedbackMessage.classList.remove("correct");
-  }
-
-  // Masquer la question actuelle
-  const questionDiv = document.getElementById(`question${numero}`);
-  if (questionDiv) {
-    questionDiv.classList.remove("active");
-  }
-
-  // Afficher le feedback
-  if (feedback) {
-    feedback.classList.add("active");
-  }
-
-  // 🔥 Enregistrement Firestore (QCM)
-  db.collection("reponsesQuiz").add({
-    participant: participantNom,
-    question: numero,
-    reponseDonnee: reponse.value,
-    bonneReponse: bonneReponse,
-    correcte: estCorrect,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-
-  let estCorrect;
-  if (Array.isArray(bonneReponse)) {
-    estCorrect = bonneReponse.includes(reponse.value);
-  } else {
-    estCorrect = reponse.value === bonneReponse;
-  }
-
-  if (estCorrect) {
-    feedbackMessage.textContent = "Bonne réponse !";
-    feedbackMessage.classList.add('correct');
-    feedbackMessage.classList.remove('incorrect');
-    score++;
-  } else {
-    feedbackMessage.textContent = `Mauvaise réponse ! La bonne réponse était : ${Array.isArray(bonneReponse) ? bonneReponse.join(" / ") : bonneReponse}.`;
-    feedbackMessage.classList.add('incorrect');
-    feedbackMessage.classList.remove('correct');
-  }
-
-  // 🔴 🔥 Enregistrer dans Firestore
-  db.collection("reponsesQuiz").add({
-        participant: participantNom,
-        question: numero,
-        reponseDonnee: reponse.value,
-        bonneReponse: bonneReponse,
-        correcte: estCorrect,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-    // Fonction pour vérifier une réponse texte
-function verifierReponseTexte(numeroQuestion, bonnesReponses) {
-  const input = document.getElementById(`reponse${numeroQuestion}`);
-  if (!input) return;
-
-  const saisie = input.value.trim().toLowerCase();
-  if (!saisie) {
-    alert("Veuillez entrer une réponse.");
-    return;
-  }
-
-  const feedback = document.getElementById(`feedback${numeroQuestion}`);
-  const feedbackMessage = document.getElementById(`feedback${numeroQuestion}Message`);
-
-  const estCorrect = bonnesReponses.some(
-    rep => rep.toLowerCase() === saisie
-  );
-
-  if (estCorrect) {
-    feedbackMessage.textContent = "Bonne réponse !";
-    feedbackMessage.classList.add("correct");
-    feedbackMessage.classList.remove("incorrect");
-    score++;
-  } else {
-    feedbackMessage.textContent =
-      "Mauvaise réponse ! Les bonnes réponses possibles étaient : " +
-      bonnesReponses.join(", ");
-    feedbackMessage.classList.add("incorrect");
-    feedbackMessage.classList.remove("correct");
-  }
-
-  // Masquer la question
-  const questionDiv = document.getElementById(`question${numeroQuestion}`);
-  if (questionDiv) {
-    questionDiv.classList.remove("active");
-  }
-
-  // Afficher le feedback
-  if (feedback) {
-    feedback.classList.add("active");
-  }
-
-  // 🔥 Enregistrement Firestore (texte)
-  db.collection("reponsesQuiz").add({
-    participant: participantNom,
-    question: numeroQuestion,
-    reponseDonnee: saisie,
-    bonnesReponses: bonnesReponses,
-    correcte: estCorrect,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-
-
-    if (estCorrect) {
-        feedbackMessage.textContent = "Bonne réponse !";
-        feedbackMessage.classList.add('correct');
-        feedbackMessage.classList.remove('incorrect');
-        score++;
-    } else {
-        feedbackMessage.textContent = `Mauvaise réponse ! Les bonnes réponses possibles étaient : ${bonnesReponses.join(', ')}.`;
-        feedbackMessage.classList.add('incorrect');
-        feedbackMessage.classList.remove('correct');
-    }
-
-    // Masquer la question actuelle
-    const questionDiv = document.getElementById(`question${numeroQuestion}`);
-    if (questionDiv) questionDiv.classList.remove("active");
-
-// Afficher le feedback
-if (feedback) feedback.classList.add("active");
-
-  // 🔥 Enregistrer dans Firestore
-  db.collection("reponsesQuiz").add({
-    participant: participantNom,
-    question: numeroQuestion,
-    reponseDonnee: saisie,
-    bonnesReponses: bonnesReponses,
-    bonneReponse: bonnesReponses[0],
-    correcte: estCorrect,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  document.getElementById(`question${numeroQuestion}`).classList.remove("active");
-  feedback.classList.add("active");
-
-    // Fonction pour passer à la question suivante ou afficher le score final
-    function suivant(numero){
-        // Liste des sauts spéciaux (page explicative, etc.)
-        const prochainBloc = {
-          29: 'explication',
-          'explication': 30,
-          30: 31,
-          31: 32,
-          32: 33,
-          33: 34,
-          34: 35,
-          35: 36,
-          36: 37,
-          37: 38,
-          38: 39,
-          39: 40,
-          40: 41,
-          41: 42,
-          42: 43,
-          43: 44,
-          44: 45,
-          45: 46,
-          46: 47,
-          47: 48,
-          48: 49,
-          49: 50,
-          50: 51,
-          51: 52,
-          52: 53,
-          53: 54,
-          54: 55,
-          55: 56,
-          56: 57,
-          57: 58,
-          58: 59,
-          59: 60,
-          60: 61,
-          61: 62,
-          62: 63,
-          63: 64,
-          64: 65,
-          65: 66,
-          66: 67,
-          67: 68,
-          68: 69,
-          69: 'resultat' // mets ici le numéro de ta dernière question
-        };
-
-      // Trouver l'élément suivant à afficher
-      const suivantId = prochainBloc[numero] !== undefined ? prochainBloc[numero] : numero + 1;
-
-      // Cacher l'élément actuel (question ou feedback)
-      const actuelId = typeof numero === "string" ? numero : `feedback${numero}`;
-      const actuelElement = document.getElementById(actuelId);
-      if (actuelElement) {
-        actuelElement.classList.remove("active");
-      }
-
-      // Si on arrive au résultat final
-      if (suivantId === 'resultat') {
-          document.getElementById("resultat").classList.add("active");
-          document.getElementById("score").textContent = `Votre score : ${score} / 69`; // adapte au total
-          // 🔥 Enregistrement du score final dans Firestore
-          db.collection("scoresQuiz").add({
-          participant: participantNom,
-          score: score,
-          totalQuestions: 30, // ajuste ce nombre si tu en ajoutes
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-      } else {
-      // Afficher la question ou explication suivante
-      const nextElement = typeof suivantId === "number"
-      ? document.getElementById(`question${suivantId}`)
-      : document.getElementById(suivantId);
-
-      if (nextElement) {
-        nextElement.classList.add("active");
-      }
-
-      // Arrêter tous les lecteurs audio
-          const audios = document.querySelectorAll('audio');
-          audios.forEach(audio => {
-          audio.pause();
-          audio.currentTime = 0;
-      });
-
-      // Arrêter tous les lecteurs vidéo
-          const videos = document.querySelectorAll('video');
-          videos.forEach(video => {
-          video.pause();
-          video.currentTime = 0;
-      });}
-    if (suivantId === 'resultat') {
-  document.getElementById("resultat").classList.add("active");
-  document.getElementById("score").textContent = `Votre score : ${score} / 69`; // adapte au total
-  }
-
-  // 🔥 Enregistrement du score final dans Firestore
-  db.collection("scoresQuiz").add({
-    participant: participantNom,
-    score: score,
-    totalQuestions: 30, // ajuste ce nombre si tu en ajoutes
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  })};
-
-    // Fonction pour recommencer le quiz
-    function recommencerQuiz() {
-  // Réinitialiser les variables et le score
-  score = 0;
-
-  // Réinitialiser tous les éléments du quiz
-  const questions = document.querySelectorAll('.question');
-  questions.forEach((q) => q.classList.remove('active'));
-
-  // Réinitialiser les boutons radio et champs texte
-  const radios = document.querySelectorAll('input[type="radio"]');
-  radios.forEach((radio) => radio.checked = false);
-
-  const textes = document.querySelectorAll('input[type="text"]');
-  textes.forEach((champ) => champ.value = '');
-
-  // Réafficher l'écran d'identité (nom)
-  document.getElementById("identite").style.display = "block";
-
-  // Cacher la section quiz
-  document.getElementById("quiz").style.display = "none";
-}
-
-  // 🔧 Configuration Firebase (à adapter avec tes vraies infos)
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyDNf6qrVBkrHyUM0SRqJ8UbkxAIh7-lErU",
     authDomain: "test-fe2c7.firebaseapp.com",
@@ -1476,31 +1153,190 @@ if (feedback) feedback.classList.add("active");
     projectId: "test-fe2c7",
     storageBucket: "test-fe2c7.firebasestorage.app",
     messagingSenderId: "939201608583",
-    appId: "1:939201608583:web:f15a2483910ee8c77fb122"
+    appId: "1:939201608583:web:f15a248391ee0c8c77fb122"
   };
 
-  //Passer à la question suivante pour les zones de texte
-
-  // 🔥 Initialisation Firebase + Firestore
+  // Firebase est initialisé AVANT toute fonction qui utilise db.
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-function allerAQuestion() {
-  const select = document.getElementById("goToQuestion");
-  const numero = select.value;
-  if (numero) {
-    // Cacher toutes les questions et feedback
-    document.querySelectorAll('.question').forEach(div => {
-      div.classList.remove('active');
-    });
+  let participantNom = "";
+  let score = 0;
+  const TOTAL_QUESTIONS = 69;
 
-    // Activer la question choisie
-    const question = document.getElementById(`question${numero}`);
-    if (question) {
-      question.classList.add('active');
+  function commencerQuiz() {
+    const nomInput = document.getElementById("nom").value.trim();
+    if (!nomInput) {
+      alert("Veuillez entrer votre nom.");
+      return;
+    }
+    participantNom = nomInput;
+    document.getElementById("identite").style.display = "none";
+    document.getElementById("quiz").style.display = "block";
+  }
+
+  async function enregistrerReponse(numero, reponseDonnee, bonneReponse, correcte) {
+    try {
+      await db.collection("reponsesQuiz").add({
+        participant: participantNom,
+        question: numero,
+        reponseDonnee: reponseDonnee,
+        bonneReponse: bonneReponse,
+        correcte: correcte,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      console.log(`Réponse ${numero} enregistrée dans Firestore.`);
+      return true;
+    } catch (erreur) {
+      console.error("Erreur Firestore lors de l'enregistrement de la réponse :", erreur);
+      alert("Impossible d'enregistrer cette réponse dans Firebase. Vérifiez les règles Firestore et votre connexion.");
+      return false;
     }
   }
-}
+
+  async function verifierReponse(numero, bonneReponse) {
+    const reponse = document.querySelector(`input[name="q${numero}"]:checked`);
+    if (!reponse) {
+      alert("Veuillez choisir une réponse avant de continuer.");
+      return;
+    }
+
+    const feedback = document.getElementById(`feedback${numero}`);
+    const feedbackMessage = document.getElementById(`feedback${numero}Message`);
+
+    const estCorrect = Array.isArray(bonneReponse)
+      ? bonneReponse.includes(reponse.value)
+      : reponse.value === bonneReponse;
+
+    if (estCorrect) {
+      feedbackMessage.textContent = "Bonne réponse !";
+      feedbackMessage.classList.add("correct");
+      feedbackMessage.classList.remove("incorrect");
+      score++;
+    } else {
+      feedbackMessage.textContent = `Mauvaise réponse ! La bonne réponse était : ${Array.isArray(bonneReponse) ? bonneReponse.join(" / ") : bonneReponse}.`;
+      feedbackMessage.classList.add("incorrect");
+      feedbackMessage.classList.remove("correct");
+    }
+
+    if (!(await enregistrerReponse(numero, reponse.value, bonneReponse, estCorrect))) {
+      return;
+    }
+
+    const question = document.getElementById(`question${numero}`);
+    if (question) question.classList.remove("active");
+    if (feedback) feedback.classList.add("active");
+  }
+
+  async function verifierReponseTexte(numeroQuestion, bonnesReponses) {
+    const input = document.getElementById(`reponse${numeroQuestion}`);
+    if (!input) return;
+
+    const saisie = input.value.trim().toLowerCase();
+    if (!saisie) {
+      alert("Veuillez entrer une réponse.");
+      return;
+    }
+
+    const feedback = document.getElementById(`feedback${numeroQuestion}`);
+    const feedbackMessage = document.getElementById(`feedback${numeroQuestion}Message`);
+    const estCorrect = bonnesReponses.some(rep => saisie === rep.toLowerCase());
+
+    if (estCorrect) {
+      feedbackMessage.textContent = "Bonne réponse !";
+      feedbackMessage.classList.add("correct");
+      feedbackMessage.classList.remove("incorrect");
+      score++;
+    } else {
+      feedbackMessage.textContent = `Mauvaise réponse ! Les bonnes réponses possibles étaient : ${bonnesReponses.join(", ")}.`;
+      feedbackMessage.classList.add("incorrect");
+      feedbackMessage.classList.remove("correct");
+    }
+
+    if (!(await enregistrerReponse(numeroQuestion, saisie, bonnesReponses, estCorrect))) {
+      return;
+    }
+
+    const question = document.getElementById(`question${numeroQuestion}`);
+    if (question) question.classList.remove("active");
+    if (feedback) feedback.classList.add("active");
+  }
+
+  async function suivant(numero) {
+    const prochainBloc = {
+      29: "explication",
+      explication: 30,
+      30: 31, 31: 32, 32: 33, 33: 34, 34: 35, 35: 36,
+      36: 37, 37: 38, 38: 39, 39: 40, 40: 41, 41: 42,
+      42: 43, 43: 44, 44: 45, 45: 46, 46: 47, 47: 48,
+      48: 49, 49: 50, 50: 51, 51: 52, 52: 53, 53: 54,
+      54: 55, 55: 56, 56: 57, 57: 58, 58: 59, 59: 60,
+      60: 61, 61: 62, 62: 63, 63: 64, 64: 65, 65: 66,
+      66: 67, 67: 68, 68: 69, 69: "resultat"
+    };
+
+    const suivantId = prochainBloc[numero] !== undefined ? prochainBloc[numero] : numero + 1;
+    const actuelId = typeof numero === "string" ? numero : `feedback${numero}`;
+    const actuel = document.getElementById(actuelId);
+    if (actuel) actuel.classList.remove("active");
+
+    if (suivantId === "resultat") {
+      const resultat = document.getElementById("resultat");
+      const scoreElement = document.getElementById("score");
+      if (resultat) resultat.classList.add("active");
+      if (scoreElement) scoreElement.textContent = `Votre score : ${score} / ${TOTAL_QUESTIONS}`;
+
+      try {
+        await db.collection("scoresQuiz").add({
+          participant: participantNom,
+          score: score,
+          totalQuestions: TOTAL_QUESTIONS,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log("Score final enregistré dans Firestore.");
+      } catch (erreur) {
+        console.error("Erreur Firestore lors de l'enregistrement du score :", erreur);
+        alert("Le score final n'a pas pu être enregistré dans Firebase.");
+      }
+      return;
+    }
+
+    const nextElement = typeof suivantId === "number"
+      ? document.getElementById(`question${suivantId}`)
+      : document.getElementById(suivantId);
+
+    if (nextElement) nextElement.classList.add("active");
+
+    document.querySelectorAll("audio").forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+    document.querySelectorAll("video").forEach(video => {
+      video.pause();
+      video.currentTime = 0;
+    });
+  }
+
+  function recommencerQuiz() {
+    score = 0;
+    participantNom = "";
+
+    document.querySelectorAll(".question").forEach(q => q.classList.remove("active"));
+    document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+    document.querySelectorAll('input[type="text"]').forEach(champ => champ.value = "");
+
+    document.getElementById("identite").style.display = "block";
+    document.getElementById("quiz").style.display = "none";
+  }
+
+  function allerAQuestion() {
+    const numero = document.getElementById("goToQuestion").value;
+    if (!numero) return;
+
+    document.querySelectorAll(".question").forEach(div => div.classList.remove("active"));
+    const question = document.getElementById(`question${numero}`);
+    if (question) question.classList.add("active");
+  }
 </script>
 </body>
 </html>
